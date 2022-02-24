@@ -18,7 +18,7 @@ class GlobalConfig(object):
     def __init__(self, config_file='config.ini'):
         self._path = os.path.join(os.getcwd(), config_file)
         if not os.path.exists(self._path):
-            raise FileNotFoundError('未能在目录下找到\'{}\'配置文件！请检查！'.format(os.getcwd()))
+            raise FileNotFoundError('未能在\'{}\'目录下找到配置文件！请检查！'.format(os.getcwd()))
         self._conf = configparser.ConfigParser()
         self._conf.read(self._path, encoding='utf-8-sig')
 
