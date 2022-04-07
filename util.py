@@ -7,6 +7,14 @@ import os
 import pickle
 
 
+def check_path(path):
+    """检查路径是否存在, 如果文件对象已存在则返回True, 否则新建文件夹"""
+    if os.path.exists(path):
+        return True
+    else:
+        os.makedirs(path, exist_ok=True)
+
+
 def parse_json(string: str) -> dict:
     """
     将获取到的字符串转译为json串

@@ -1,4 +1,5 @@
 import logging.handlers
+from util import check_path
 
 
 # 创建日志对象
@@ -6,6 +7,7 @@ logger = logging.getLogger()
 
 
 def setLogger():
+    """用于为logger实例化对象添加handlers与设置格式"""
     logger.setLevel(logging.INFO)  # 设置日志默认级别为INFO级
     # 设置日志格式
     formatter = logging.Formatter(fmt='[%(asctime)s] %(module)s.%(funcName)s %(levelname)s: %(message)s',
@@ -28,8 +30,11 @@ def setLogger():
     # logger.addHandler(fh)
 
     # 添加回滚文件保存规则
+
+    check_path('./Logs/')       # 检查logs存储目录是否存在
     rh = logging.handlers.RotatingFileHandler(
         './Logs\\JD_AutoSnap.log', maxBytes=30, backupCount=5, encoding='utf-8')
+    # 最大字节数为30b, 回滚文件数为5
     rh.setLevel(logging.INFO)
     rh.setFormatter(formatter)
     logger.addHandler(rh)
