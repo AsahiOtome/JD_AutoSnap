@@ -6,7 +6,7 @@ from util import check_path
 logger = logging.getLogger()
 
 
-def setLogger():
+def set_logger():
     """用于为logger实例化对象添加handlers与设置格式"""
     logger.setLevel(logging.INFO)  # 设置日志默认级别为INFO级
     # 设置日志格式
@@ -40,5 +40,5 @@ def setLogger():
     logger.addHandler(rh)
 
 
-setLogger()
+set_logger()
 

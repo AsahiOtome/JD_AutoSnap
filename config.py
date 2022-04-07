@@ -23,7 +23,33 @@ class GlobalConfig(object):
         self._conf.read(self._path, encoding='utf-8-sig')
 
     def get(self, section: str, option: str) -> str:
+        """指定section与option, 返回对应值"""
         return self._conf.get(section, option)
+
+    def set(self, section: str, option: str, value):
+        """更改对应值"""
+        self._conf.set(section, option, value)
+
+    def delete(self, section: str, option: str):
+        """删除目标option"""
+        self._conf.remove_option(section, option)
+
+    def save(self):
+        """将更改后的信息写回文件中"""
+        with open(self._path, "wt", encoding="utf-8-sig") as f:
+            self._conf.write(f)
+
+    def get_items(self) -> dict:
+        """
+        以遍历的形式返回所有config信息
+        :return:字典
+        """
+        items = {}
+        for section in self._conf.values():
+            items[section.name] = {}
+            for key, value in section.items():
+                items[section.name][key] = value
+        return items
 
 
 global_config = GlobalConfig()

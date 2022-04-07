@@ -10,12 +10,13 @@ from lxml.html import tostring
 import re
 from util import wait_some_time
 
-"""获取商品的抢购链接
+"""
+获取商品的抢购链接
 点击"抢购"按钮后，会有两次302跳转，最后到达订单结算页面
 这里返回第一次跳转后的页面url，作为商品的抢购链接
 :return: 商品的抢购链接
 """
-
+class
 
 # 访问商品网站
 def get_sku_title(self):
