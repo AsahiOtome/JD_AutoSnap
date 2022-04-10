@@ -30,8 +30,8 @@ class JDSnap(object):
         self.seckill_order_data = dict()
         self.timers = Timer()
 
-        self.session = self.spider_session.get_session()
-        self.user_agent = self.spider_session.user_agent
+        self.session = self.session.get_session()
+        self.user_agent = self.session.user_agent
         self.nick_name = None
 
 
