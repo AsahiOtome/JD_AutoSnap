@@ -19,25 +19,26 @@ from util import wait_some_time, SpiderSession
 
 class JDSnap(object):
     def __init__(self):
-        self.session = SpiderSession()
+        self.session = SpiderSession()      # 此时为对SpiderSession对象的调用
         self.session.load_cookies_from_local()
 
         # 初始化信息
-        self.sku_id = global_config.getRaw('config', 'sku_id')
-        self.seckill_num = eval(global_config.getRaw('settings', 'buy_amount'))
+        self.sku_id = global_config.get('config', 'sku_id')
+        self.seckill_num = eval(global_config.get('settings', 'buy_amount'))
         self.seckill_init_info = dict()
         self.seckill_url = dict()
         self.seckill_order_data = dict()
-        self.timers = Timer()
 
-        self.session = self.session.get_session()
+        self.session = self.session.get_session()   # 即为SpiderSession.session
         self.user_agent = self.session.user_agent
         self.nick_name = None
 
 
-# 访问商品网站
 def get_sku_title(self):
-    """获取商品名称"""
+    """
+    访问商品网站, 获取商品名称
+    使用参数: sku_id, header
+    """
     url = 'https://item.jd.com/{}.html'.format(global_config.getRaw('config', 'sku_id'))
     header = {
         'host': 'item.jd.com',
@@ -56,8 +57,12 @@ def get_sku_title(self):
         break
 
 
-# 添加购物车
 def add_to_cart(self):
+    """
+    将商品添加到购物车
+    使用参数: header, sku_id, pcount
+    :return:
+    """
     url = 'https://cart.jd.com/gate.action'
     payload = {
         'ptype': self.seckill_num,
@@ -73,8 +78,10 @@ def add_to_cart(self):
     self.cart_url = resp.url
 
 
-# 查询购物车
 def cart_check(self):
+    """
+    对购物车进行一次查询
+    """
     url = 'https://cart.jd.com/cart.action'
     param = {
         'r': random.random()
@@ -88,8 +95,12 @@ def cart_check(self):
     self.session.get(url=url, headers=header, params=param)
 
 
-# 获取订单参数
 def get_order_info(self):
+    """
+    获取订单参数
+    :return:
+    """
+
     url = 'https://trade.jd.com/shopping/order/getOrderInfo.action'
     header = {
         'host': 'trade.jd.com',
@@ -124,8 +135,12 @@ def get_order_info(self):
     # 获取ignorePriceChange参数
 
 
-# 生成订单
 def order_submit(self):
+    """
+    生成订单
+    :param self:
+    :return:
+    """
     url = 'https://trade.jd.com/shopping/order/submitOrder.action'
     data = {
         "overseaPurchaseCookies": "",
@@ -156,8 +171,8 @@ def order_submit(self):
         return False
 
 
-# 提交订单
 def order_success(self):
+    """提交订单"""
     url = "https://success.jd.com/success/success.action"
     header = {
         "Host": "success.jd.com",
@@ -169,25 +184,3 @@ def order_success(self):
         "rid": random.random()
     }
     self.session.get(url, headers=header, params=param)
-
-
-if __name__ == "__main__":
-    jd_seckill = Seckiller()
-    jd_seckill.login_by_qrcode()
-    get_sku_title(jd_seckill)
-    jd_seckill.timers.start()
-    for i in range(3):
-        try:
-            add_to_cart(jd_seckill)
-            while True:
-                cart_check(jd_seckill)
-                get_order_info(jd_seckill)
-                if order_submit(jd_seckill):
-                    logger.info("订单生成成功！订单ID为：{}，请前去支付……".format(jd_seckill.orderId))
-                    break
-                else:
-                    logger.info("订单生成失败……")
-            break
-        except Exception as e:
-            logger.info('抢购发生异常，稍后继续执行！', e)
-        wait_some_time()

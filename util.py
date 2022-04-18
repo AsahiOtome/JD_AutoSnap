@@ -5,6 +5,7 @@ import requests
 from config import global_config
 import os
 import pickle
+import faker
 
 
 def check_path(path):
@@ -44,6 +45,12 @@ def wait_some_time():
     time.sleep(random.randint(100, 300) / 100)
 
 
+def create_user_agent():
+    f = faker.Factory().create()
+    ua = f.user_agent()
+    return ua
+
+
 """
 session.headers 将会添加一个预先的header字典，在get时自动应用。在get(headers=headers)时会将两个headers整合到一起，
 如果存在重复的key则会用后者的value覆盖前者。
@@ -55,11 +62,12 @@ class SpiderSession(object):
     """
     用于对session进行初始化，并提供cookies的存储与调用功能
     """
+
     def __init__(self):
         self._cookies_path = './cookies/' + global_config.get('settings', 'project_name') + '.cookies'
         self._accept = global_config.get('connect_config', 'accept')
         self._connection = global_config.get('connect_config', 'connection')
-        self._user_agent = get_random_users()
+        self._user_agent = create_user_agent()
 
         self.session = self._init_session()
 
@@ -114,5 +122,3 @@ class SpiderSession(object):
         with open(self._cookies_path, 'rb') as fp:
             cookies = pickle.load(fp)
         self.get_session().cookies.update(cookies)
-
-
