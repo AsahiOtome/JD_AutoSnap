@@ -42,6 +42,7 @@ def get_random_users() -> str:
 
 
 def wait_some_time():
+    """睡眠0.1s至0.3s"""
     time.sleep(random.randint(100, 300) / 100)
 
 
