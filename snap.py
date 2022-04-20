@@ -28,6 +28,7 @@ class JDSnap(object):
 
         self.cart_url = dict()
         self.snap_params = dict()
+        self.orderId = ''
 
         self.session = self.session.get_session()  # 即为SpiderSession.session
         self.user_agent = self.session.user_agent
@@ -138,41 +139,40 @@ class JDSnap(object):
         ignore_info = x_data_order.xpath('/html/body[@id="mainframe"]/input[@id="ignorePriceChange"]/@value')[0]
         self.snap_params.update({"ignore": ignore_info})
 
-
-def order_submit(self):
-    """
-    生成订单
-    :param self:
-    :return:
-    """
-    url = 'https://trade.jd.com/shopping/order/submitOrder.action'
-    data = {
-        "overseaPurchaseCookies": "",
-        "vendorRemarks": self.vendor,
-        "submitOrderParam.sopNotPutInvoice": self.sop,
-        "submitOrderParam.trackID": self.trackID,
-        "presaleStockSign": self.presale,
-        "submitOrderParam.ignorePriceChange": self.ignore,
-        "submitOrderParam.btSupport": "0",
-        "submitOrderParam.jxj": "1"
-    }
-    param = {
-        'presaleStockSign': 1
-    }
-    header = {
-        'Host': 'trade.jd.com',
-        'Origin': 'https://trade.jd.com',
-        'Referer': 'https://trade.jd.com/shopping/order/getOrderInfo.action',
-        'User-Agent': self.user_agent
-    }
-    logger.info("尝试提交订单……")
-    resp = self.session.get(url, params=param, headers=header, data=data)
-    resp_json = resp.json()
-    if resp_json.get('success'):
-        self.orderId = resp_json.get('orderId')
-        return True
-    else:
-        return False
+    def order_submit(self):
+        """
+        生成订单
+        :param self:
+        :return:
+        """
+        url = 'https://trade.jd.com/shopping/order/submitOrder.action'
+        data = {
+            "overseaPurchaseCookies": "",
+            "vendorRemarks": self.snap_params.get('vendor'),
+            "submitOrderParam.sopNotPutInvoice": self.snap_params.get('sop'),
+            "submitOrderParam.trackID": self.snap_params.get('trackID'),
+            "presaleStockSign": self.snap_params.get('presale'),
+            "submitOrderParam.ignorePriceChange": self.snap_params.get('ignore'),
+            "submitOrderParam.btSupport": "0",
+            "submitOrderParam.jxj": "1"
+        }
+        param = {
+            'presaleStockSign': 1
+        }
+        header = {
+            'Host': 'trade.jd.com',
+            'Origin': 'https://trade.jd.com',
+            'Referer': 'https://trade.jd.com/shopping/order/getOrderInfo.action',
+            'User-Agent': self.user_agent
+        }
+        logger.info("尝试提交订单……")
+        resp = self.session.get(url, params=param, headers=header, data=data)
+        resp_json = resp.json()
+        if resp_json.get('success'):
+            self.orderId = resp_json.get('orderId')
+            return True
+        else:
+            return False
 
 
 def order_success(self):
