@@ -23,7 +23,7 @@ def parse_json(string: str) -> dict:
     :return:
     """
     begin = string.find('{')
-    end = string.find('}') + 1
+    end = len(string) - string[::-1].find('}')
     return json.loads(string[begin:end])
 
 
