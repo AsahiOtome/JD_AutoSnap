@@ -52,74 +52,29 @@ def create_user_agent():
     return ua
 
 
-"""
-session.headers 将会添加一个预先的header字典，在get时自动应用。在get(headers=headers)时会将两个headers整合到一起，
-如果存在重复的key则会用后者的value覆盖前者。
-pickle.dump() 函数能一个接着一个地将几个对象转储到同一个文件。随后调用 pickle.load() 来以同样的顺序检索这些对象
-"""
+def response_status(resp):
+    """检查resp的返回是否为200正常"""
+    if resp.status_code != requests.codes.OK:
+        print('Status: %u, Url: %s' % (resp.status_code, resp.url))
+        return False
+    return True
 
 
-class SpiderSession(object):
-    """
-    用于对session进行初始化，并提供cookies的存储与调用功能
-    """
+def open_image(image_file):
+    if os.name == "nt":
+        os.system('start ' + image_file)  # for Windows
+    else:
+        if os.uname()[0] == "Linux":
+            if "deepin" in os.uname()[2]:
+                os.system("deepin-image-viewer " + image_file)  # for deepin
+            else:
+                os.system("eog " + image_file)  # for Linux
+        else:
+            os.system("open " + image_file)  # for Mac
 
-    def __init__(self):
-        self._cookies_path = './cookies/' + global_config.get('settings', 'project_name') + '.cookies'
-        self._accept = global_config.get('connect_config', 'accept')
-        self._connection = global_config.get('connect_config', 'connection')
-        self._user_agent = create_user_agent()
 
-        self.session = self._init_session()
+def save_image(resp, image_file):
+    with open(image_file, 'wb') as f:
+        for chunk in resp.iter_content(chunk_size=1024):
+            f.write(chunk)
 
-    def _init_session(self):
-        session = requests.session()
-        session.headers = self.get_headers()
-        return session
-
-    def get_headers(self):
-        headers = {
-            'Accept': self._accept,
-            'User - Agent': self._user_agent,
-            'Connection': self._connection
-        }
-        return headers
-
-    def get_user_agent(self):
-        return self._user_agent
-
-    def get_session(self):
-        """
-        获取当前session信息
-        :return:
-        """
-        return self.session
-
-    def get_cookies(self):
-        """
-        获取当前cookies
-        :return:
-        """
-        return self.get_session().cookies
-
-    def save_cookies_to_local(self):
-        """
-        将当前cookies保存至本地文件
-        :return:
-        """
-        directory = os.path.dirname(self._cookies_path)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        with open(self._cookies_path, 'wb') as fp:
-            pickle.dump(self.get_cookies(), fp)
-
-    def load_cookies_from_local(self):
-        """
-        从本地文件读取上一次的cookies
-        :return:
-        """
-        if not os.path.exists(self._cookies_path):
-            return False
-        with open(self._cookies_path, 'rb') as fp:
-            cookies = pickle.load(fp)
-        self.get_session().cookies.update(cookies)

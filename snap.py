@@ -174,17 +174,16 @@ class JDSnap(object):
         else:
             return False
 
-
-def order_success(self):
-    """提交订单"""
-    url = "https://success.jd.com/success/success.action"
-    header = {
-        "Host": "success.jd.com",
-        "Referer": "https://trade.jd.com/",
-        "Upgrade-Insecure-Requests": '1'
-    }
-    param = {
-        "orderId": self.orderId,
-        "rid": random.random()
-    }
-    self.session.get(url, headers=header, params=param)
+    def order_success(self):
+        """提交订单"""
+        url = "https://success.jd.com/success/success.action"
+        header = {
+            "Host": "success.jd.com",
+            "Referer": "https://trade.jd.com/",
+            "Upgrade-Insecure-Requests": '1'
+        }
+        param = {
+            "orderId": self.orderId,
+            "rid": random.random()
+        }
+        self.session.get(url, headers=header, params=param)
