@@ -18,10 +18,19 @@ pickle.dump() 函数能一个接着一个地将几个对象转储到同一个文
 
 class SpiderSession(object):
     """
-    用于对session进行初始化，并提供cookies的存储与调用功能
+    用于对session进行初始化, 并提供cookies的存储与调用功能
+    session相关内容仅储存在, session参数中, 通常通过get_session()调用, 包含
     """
 
     def __init__(self):
+        """
+        _cookies_path: 获取cookies文件的存储地址
+        _accept: 从config配置中获取header中的accept参数
+        _connection: 从config配置中获取header中的connection参数
+        _user_agent: 使用faker包生成随机user-agent
+
+        session: 搭载从requests中初始化的session对象
+        """
         self._cookies_path = './cookies/' + global_config.get('settings', 'project_name') + '.cookies'
         self._accept = global_config.get('connect_config', 'accept')
         self._connection = global_config.get('connect_config', 'connection')
@@ -30,11 +39,13 @@ class SpiderSession(object):
         self.session = self._init_session()
 
     def _init_session(self):
+        """从requests中初始化的session对象, 并加载headers"""
         session = requests.session()
         session.headers = self.get_headers()
         return session
 
     def get_headers(self):
+        """利用获得的参数初始化headers"""
         headers = {
             'Accept': self._accept,
             'User - Agent': self._user_agent,
@@ -43,18 +54,19 @@ class SpiderSession(object):
         return headers
 
     def get_user_agent(self):
+        """用于外部获取user-agent的函数"""
         return self._user_agent
 
     def get_session(self):
         """
-        获取当前session信息
+        用于外部获取当前session的函数
         :return:
         """
         return self.session
 
     def get_cookies(self):
         """
-        获取当前cookies
+        用于外部获取当前cookies
         :return:
         """
         return self.get_session().cookies
@@ -226,7 +238,7 @@ class QrLogin:
 
         # download QR code
         if not self._get_qrcode():
-            raise SKException('二维码下载失败')
+            raise Exception('二维码下载失败')
 
         # get QR code ticket
         ticket = None
@@ -237,11 +249,11 @@ class QrLogin:
                 break
             time.sleep(2)
         else:
-            raise SKException('二维码过期，请重新获取扫描')
+            raise Exception('二维码过期，请重新获取扫描')
 
         # validate QR code ticket
         if not self._validate_qrcode_ticket(ticket):
-            raise SKException('二维码信息校验失败')
+            raise Exception('二维码信息校验失败')
 
         self.refresh_login_status()
 
