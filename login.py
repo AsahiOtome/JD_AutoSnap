@@ -1,12 +1,8 @@
-import json
-import random
-import time
-import requests
-from config import global_config
-from util import create_user_agent, open_image, save_image, response_status, parse_json
+from util import *
 import os
 import pickle
 from logger import logger
+from SKException import SKException
 
 
 """
@@ -94,15 +90,15 @@ class QrLogin:
             1、访问登录二维码页面，获取Token
             2、使用Token获取票据
             3、校验票据
-        :param spider_session:
+        :param spider_session: 载入外部提供的 spider_session 类, 用于后续将登录成功的 cookies 导入
         """
         self.qrcode_img_file = 'qr_code.png'
 
-        self.spider_session = spider_session
-        self.session = self.spider_session.get_session()
+        self.spider_session = spider_session    # 载入外部提供的 spider_session 类
+        self.session = self.spider_session.get_session()    # 单独获取其中的 session
 
-        self.is_login = False
-        self.refresh_login_status()
+        self.is_login = False   # 初始化: 默认未登录
+        self.refresh_login_status()     # 刷新登录状态
 
     def refresh_login_status(self):
         """

@@ -1,13 +1,8 @@
-import json
-import time
-
-from config import global_config
-import random
-from logger import logger
 from lxml import etree
 from lxml.html import tostring
 import re
-from util import wait_some_time, SpiderSession
+from util import *
+from login import *
 
 """
 获取商品的抢购链接
