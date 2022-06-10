@@ -4,16 +4,37 @@ import time
 import requests
 from config import global_config
 import os
-import pickle
+from subprocess import Popen
 import faker
+import shutil
+import re
 
 
-def check_path(path):
-    """检查路径是否存在, 如果文件对象已存在则返回True, 否则新建文件夹"""
-    if os.path.exists(path):
+def check_path(path, delete=False, exist_ok=True):
+    """
+    检查 文件夹/文件 是否存在
+    :param path: 对象路径
+    :param delete: 如果对象已存在, 是否删除
+    :param exist_ok: 如果文件夹内有文件存在, 是否删除, True为继续删除, False为报错
+    """
+    if re.findall(r'\.[\d\w]+$', path):
+        """以是否以.数字/英文结尾来判断是否为文件路径"""
+        if os.path.exists(path) and delete:
+            os.remove(path)
         return True
     else:
-        os.makedirs(path, exist_ok=True)
+        """对象非文件时按文件夹处理"""
+        if not os.path.exists(path):
+            """不存在时新建文件夹"""
+            os.makedirs(path)
+        elif delete and exist_ok:
+            shutil.rmtree(path)
+        elif delete and not exist_ok:
+            try:
+                os.rmdir(path)
+            except OSError:
+                raise Exception("目标文件夹下存在文件, 无法删除!")
+        return True
 
 
 def parse_json(string: str) -> dict:
@@ -34,7 +55,7 @@ json.loads()对字符串的读取必须严格按照单引号'包裹双引号"的
 
 def get_random_users() -> str:
     """
-    生成随机的用户代理
+    从config中生成随机的用户代理
     :return:
     """
     user_agents = list(json.loads(global_config.get('connect_config', 'user_agents').replace('\n', '')).values())
@@ -47,6 +68,7 @@ def wait_some_time():
 
 
 def create_user_agent():
+    """使用faker包生成随机user-agent"""
     f = faker.Factory().create()
     ua = f.user_agent()
     return ua
@@ -61,8 +83,9 @@ def response_status(resp):
 
 
 def open_image(image_file):
+    """根据系统类型调用打开图像指令"""
     if os.name == "nt":
-        os.system('start ' + image_file)  # for Windows
+        Popen('start ' + image_file, shell=True)  # for Windows
     else:
         if os.uname()[0] == "Linux":
             if "deepin" in os.uname()[2]:
@@ -74,7 +97,17 @@ def open_image(image_file):
 
 
 def save_image(resp, image_file):
+    """
+    保存目标图像到本地
+    :param resp: 下载对象的response
+    :param image_file: 保存路径
+    """
     with open(image_file, 'wb') as f:
         for chunk in resp.iter_content(chunk_size=1024):
             f.write(chunk)
 
+
+class SlightException(Exception):
+    """自定义报错组件, 用于区分是否需要跳出程序的错误"""
+    def __init__(self, message):
+        super().__init__(message)
